@@ -1,63 +1,58 @@
-(ns peg-simple)
+(ns peg-simple.core
+  (:require [clojure.contrib.str-utils2 :as str-utils2]))
 
 (defn make-terminal-parser [terminal]
-  (fn [[_ input]]
-    (if (= terminal (first input))
-      (list true (next input))
-      (list nil input))))
+  (fn [form]
+    (when (= terminal (first form))
+      (rest form))))
 
-(defn peg-sequence [parse-expression1 parse-expression2 [_ input :as data]]
-  (let [[result remaining-input :as return-data] (parse-expression1 data)]
-    (if result
-      (parse-expression2 return-data)
-      (list nil input))))
+(defn make-non-terminal-parser [& expressions])
 
-(defn ordered-choice [parse-expression1 parse-expression2 [_ input :as data]]
-  (let [[result remaining-input :as return-data] (parse-expression1 data)]
-    (if result
-      return-data
-      (parse-expression2 data))))
+(defn peg-sequence [form & all-parse-expressions]
+  (let [rest-form ((first all-parse-expressions) form)]
+    (when rest-form 
+      (if-let [rest-parse-expressions (next all-parse-expressions)] 
+	(apply peg-sequence rest-form rest-parse-expressions)
+	rest-form))))
 
-(defn zero-or-more [parse-expression [_ input :as data]]
-  (let [[result remaining-input :as return-data] (parse-expression data)]
-    (if (not result)
-      data
-      (recur parse-expression return-data))))
+(defn ordered-choice [form & all-parse-expressions]
+  (if-let [rest-form ((first all-parse-expressions) form)]
+    rest-form
+    (when-let [rest-parse-expressions (next all-parse-expressions)]
+      (apply ordered-choice form rest-parse-expressions))))
 
-(defn one-or-more [parse-expression [_ input :as data]]
-  (let [[result remaining-input :as return-data] (parse-expression data)]
-    (if result
-      (zero-or-more parse-expression return-data)
-      (list nil input))))
+(defn zero-or-more [form parse-expression]
+  (let [rest-form (parse-expression form)]
+    (if (not rest-form)
+      form
+      (recur rest-form parse-expression))))
 
-(defn optional [parse-expression [_ input :as data]]
-  (let [[result remaining-input :as return-data] (parse-expression data)]
-    (if result
-      return-data
-      data)))
+(defn one-or-more [form parse-expression]
+  (when-let [rest-form (parse-expression form)]
+    (zero-or-more rest-form parse-expression)))
 
-(defn and-predicate? [parse-expression [_ input :as data]]
-  (let [[result remaining-input :as return-data] (parse-expression data)]
-    (if result
-      data
-      (list nil input))))
+(defn optional [form parse-expression]
+  (let [rest-form (parse-expression form)]
+    (if rest-form
+      rest-form
+      form)))
 
-(defn not-predicate? [parse-expression [_ input :as data]]
-  (let [[result remaining-input :as return-data] (parse-expression data)]
-    (if result
-      (list nil input)
-      data)))
+(defn and-predicate? [form parse-expression]
+  (when-let [rest-form (parse-expression form)]
+    form))
+
+(defn not-predicate? [form parse-expression]
+  (let [rest-form (parse-expression form)]
+    (when-not rest-form
+      form)))
 
 (defn test-stuff []
-  (let [h (make-terminal-parser 'h)
-	k (make-terminal-parser 'k)]
-    (ordered-choice h (partial peg-sequence h k) '(true (h k a b c d)))))
-
-(defn test-stuff2 []
-  (let [h (make-terminal-parser 'h) ]
-    (h (h '(true (h h a b c d))))))
-
-(defn test-stuff3 []
-  (let [h (make-terminal-parser 'h)
-	k (make-terminal-parser 'k) ]
-    (->> '(true (h h k a b c d)) (peg-sequence h h) k)))
+  (let [h (make-terminal-parser \h)
+	k (make-terminal-parser \k)
+	z (make-terminal-parser \z)
+	form "hkzabc"]
+    (println (ordered-choice form z k h))
+    (println (not-predicate? form k))
+    (println (and-predicate? form h))
+    (println (peg-sequence form h k z))
+    (println (peg-sequence form (str-utils2/partial zero-or-more h) k z))))
