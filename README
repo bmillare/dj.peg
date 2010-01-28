@@ -1,0 +1,13 @@
+simple-peg
+
+A simple parsing expression grammar (PEG) defined parser generator
+
+Designed to be simple and flexible
+
+At the moment, this release is alpha, currently debugging PEGs with cycles.
+
+License
+
+Copyright (C) 2009-2010 Brent Millare
+
+This file is licensed under the terms of the GNU General Public License as distributed with Emacs (press C-h C-c to view it)

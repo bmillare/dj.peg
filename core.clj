@@ -8,7 +8,8 @@ then later flexible, then fast/featureful. It should mesh well with clojure
 when possible. So for example, I opted for implementing a prefix style notation
 when defining the PEG
 
-simple-peg ultimately operates on sequences
+simple-peg ultimately operates only on sequences but many things can be represented
+as sequences
 
 TODO:
 add let-like binding form for describing named expressions all together
@@ -65,19 +66,26 @@ PUBLISH
       form)))
 
 (defn make-terminal-parser [terminal]
+  (println "make-terminal-parser" terminal)  
   (fn [form]
     (when (= terminal (first form))
       (rest form))))
 
 (defn make-non-terminal-many-parser [operator all-parse-expressions]
+  (println "make-non-terminal-many-parser" operator)
   (fn [form]
     (apply operator form all-parse-expressions)))
 
 (defn make-non-terminal-parser [operator parse-expression]
+  (println "make-non-terminal-parser" operator)  
   (fn [form]
     (operator form parse-expression)))
 
 (defn make-parser-aux [expression-form]
+  (println "make-parser-aux" (if (seq? expression-form)
+			       (#{::sequence ::ordered-choice ::zero-or-more ::one-or-more
+	      ::optional ::and-predicate? ::not-predicate} (first expression-form))
+			       expression-form))
   (if (and (seq? expression-form)
 	   (#{::sequence ::ordered-choice ::zero-or-more ::one-or-more
 	      ::optional ::and-predicate? ::not-predicate} (first expression-form)))
@@ -116,16 +124,6 @@ PUBLISH
   (apply list ::sequence rest-args))
 (defn do-c [rest-args]
   (apply list ::ordered-choice rest-args))
-(defn dz-o-m [rest-args]
-  (apply list ::zero-or-more rest-args))
-(defn do-o-m [rest-args]
-  (apply list ::one-or-more rest-args))
-(defn do [rest-args]
-  (apply list ::optional rest-args))
-(defn da-p? [rest-args]
-  (apply list ::and-predicate? rest-args))
-(defn dn-p? [rest-args]
-  (apply list ::not-predicate? rest-args))
 
 (defmacro make-parser [bindings]
   "Using let like syntax, passes final PEG form into make-parser-aux"
@@ -184,5 +182,4 @@ PUBLISH
   (let [x (make-parser [A (s \a (o A) \b)
 			B (s \b (o B) \c)
 			S (s (a-p? (s A \c)) (o-o-m \a) B (n-p? (o-c \a \b \c)))])]
-    (println x)
     (x '(\a \b \c))))
