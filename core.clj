@@ -20,7 +20,7 @@ PUBLISH
 "
   (:use clojure.contrib.macro-utils))
 
-(defn peg-sequence [form & all-parse-expressions]
+(defn- peg-sequence [form & all-parse-expressions]
   (println "s" form)
   (let [rest-form ((first all-parse-expressions) form)]
     (when rest-form 
@@ -28,55 +28,55 @@ PUBLISH
 	(apply peg-sequence rest-form rest-parse-expressions)
 	rest-form))))
 
-(defn ordered-choice [form & all-parse-expressions]
+(defn- ordered-choice [form & all-parse-expressions]
   (println "o-c" form)
   (if-let [rest-form ((first all-parse-expressions) form)]
     rest-form
     (when-let [rest-parse-expressions (next all-parse-expressions)]
       (apply ordered-choice form rest-parse-expressions))))
 
-(defn zero-or-more [form parse-expression]
+(defn- zero-or-more [form parse-expression]
   (println "z-o-m" form)
   (let [rest-form (parse-expression form)]
     (if (not rest-form)
       form
       (recur rest-form parse-expression))))
 
-(defn one-or-more [form parse-expression]
+(defn- one-or-more [form parse-expression]
   (println "o-o-m" form)
   (when-let [rest-form (parse-expression form)]
     (zero-or-more rest-form parse-expression)))
 
-(defn optional [form parse-expression]
+(defn- optional [form parse-expression]
   (println "o" form)
   (let [rest-form (parse-expression form)]
     (if rest-form
       rest-form
       form)))
 
-(defn and-predicate? [form parse-expression]
+(defn- and-predicate? [form parse-expression]
   (println "a-p?" form)
   (when-let [rest-form (parse-expression form)]
     form))
 
-(defn not-predicate? [form parse-expression]
+(defn- not-predicate? [form parse-expression]
   (println "n-p?" form)
   (let [rest-form (parse-expression form)]
     (when-not rest-form
       form)))
 
-(defn make-terminal-parser [terminal]
+(defn- make-terminal-parser [terminal]
   (println "make-terminal-parser" terminal)  
   (fn [form]
     (when (= terminal (first form))
       (rest form))))
 
-(defn make-non-terminal-many-parser [operator all-parse-expressions]
+(defn- make-non-terminal-many-parser [operator all-parse-expressions]
   (println "make-non-terminal-many-parser" operator)
   (fn [form]
     (apply operator form all-parse-expressions)))
 
-(defn make-non-terminal-parser [operator parse-expression]
+(defn- make-non-terminal-parser [operator parse-expression]
   (println "make-non-terminal-parser" operator)  
   (fn [form]
     (operator form parse-expression)))
