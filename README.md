@@ -1,9 +1,25 @@
-# dj.peg
+# dj-peg 0.1.0
 
-A simple parsing expression grammar (PEG) defined parser generator
+A Ring inspired (aka functional and composable) parsing expression
+grammar (PEG) library.
 
-The source is written psuedo literate programming style, so just read
-that to learn more.
+A while back I wrote a PEG generator. Since it was buggy, I've
+completely rewritten it and also tried to write it psuedo literate
+programming (LP) style, in that I try to make it more of a story. I
+don't rely on any LP tools, its just heavily commented and should flow
+linearly. So if you never knew about PEGs before and want to dive into
+it, this would be a good opportunity to check it out.
+
+A quick example:
+
+(require [dj.peg :as peg])
+
+(let [num (peg/alter-result (peg/token #"\d+") #(Integer/parseInt %))
+      whitespace (peg/token #"\s+")
+      triplet (peg/seq num whitespace num whitespace num)]
+  (peg/parse triplet "3 44 2theremaininginput"))
+
+;;user=> [[3 " " 44 " " 2] "theremaininginput"]       
 
 # Author
 
