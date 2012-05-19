@@ -12,14 +12,14 @@ it, this would be a good opportunity to check it out.
 
 A quick example:
 
-`(require [dj.peg :as peg])
+    (require [dj.peg :as peg])
 
-(let [num (peg/alter-result (peg/token #"\d+") #(Integer/parseInt %))
-      whitespace (peg/token #"\s+")
-      triplet (peg/seq num whitespace num whitespace num)]
-  (peg/parse triplet "3 44 2theremaininginput"))
+    (let [num (peg/alter-result (peg/token #"\d+") #(Integer/parseInt %))
+          whitespace (peg/token #"\s+")
+          triplet (peg/seq num whitespace num whitespace num)]
+      (peg/parse triplet "3 44 2theremaininginput"))
 
-;;user=> [[3 " " 44 " " 2] "theremaininginput"] `      
+    ;;user=> [[3 " " 44 " " 2] "theremaininginput"]
 
 # Author
 
