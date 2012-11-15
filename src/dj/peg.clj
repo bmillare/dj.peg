@@ -1,5 +1,5 @@
 (ns dj.peg
-  (:refer-clojure :exclude [* + /]))
+  (:refer-clojure :exclude [* +]))
 ;; api:
 ;; t, s, *, +, ?, /, !?, &?, alt
 
@@ -179,7 +179,7 @@
 			 (fn [_ _]
 			   (fail nil input))))
 		      fail)))]
-       (reduce seq' (seq m n) args))))
+       (reduce seq' (s m n) args))))
 
 ;; I won't go into detail about the remaining PEG operators, choice,
 ;; star, plus, not?, and?, and opt since you can learn about the
@@ -202,7 +202,7 @@
 	   succeed
 	   fail)))))
   ([m n & args]
-     (reduce / (/ m n) args)))
+     (reduce | (| m n) args)))
 
 ;; star
 (defn *
