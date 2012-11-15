@@ -14,7 +14,7 @@ A quick example:
 
     (require [dj.peg :as peg])
 
-    (let [num (peg/alter-result (peg/token #"\d+") #(Integer/parseInt %))
+    (let [num (peg/alt (peg/token #"\d+") #(Integer/parseInt %))
           whitespace (peg/token #"\s+")
           triplet (peg/seq num whitespace num whitespace num)]
       (peg/parse triplet "3 44 2theremaininginput"))
