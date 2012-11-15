@@ -1,1 +1,1 @@
-(defproject dj.peg "0.1.0")
+(defproject dj.peg "0.2.0")
