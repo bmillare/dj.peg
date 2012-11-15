@@ -22,15 +22,25 @@ A quick example:
     ;;user=> [[3 " " 44 " " 2] "theremaininginput"]
 
 API summary:
+
 t: token
+
 s: sequence
+
 *: star
+
 +: plus
+
 ?: opt
+
 |: choice
+
 !?: not?
+
 &?: and?
+
 alt: alter-result
+
 
 # Author
 
