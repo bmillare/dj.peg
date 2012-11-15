@@ -47,7 +47,7 @@
 
 ;; This document should flow linearly from start to finish. At the end
 ;; of the document, make sure you should understand token, any of the
-;; parser/parser generators, alter-result, and parse.
+;; parser/parser generators, alt, and parse.
 
 ;; Token is our model terminal parser.
 
@@ -55,7 +55,7 @@
 ;; this library. Those are the functions you will call to construct
 ;; your grammars.
 
-;; alter-result is the default continuation wrapper that lets us
+;; alt is the default continuation wrapper that lets us
 ;; actually do useful work after parsing. Users of this library will
 ;; need to interleave this to different parts of their sub-parsers.
 
@@ -320,15 +320,15 @@
 		 fail)))
 
 ;; The peg library takes some inspiration from Ring. The function
-;; alter-result is like middleware in that it wraps the old parser, do
+;; alt is like middleware in that it wraps the old parser, do
 ;; some data manipulation, and return a new parser.
 
-(defn alter-result
+(defn alt
 ;; To me this is the most useful continuation wrapper. One good
 ;; example, you want to parse a number, so you write a token parser
 ;; with (peg/token #"\d+"). You want the result to be an actual
 ;; number, so you wrap it with java's integer
-;; parser. (peg/alter-result (peg/token #"\d+") #(Integer/parseInt %))
+;; parser. (peg/alt (peg/token #"\d+") #(Integer/parseInt %))
 ;; Now, when you invoke it, succeed gets passed an Integer instead of
 ;; a string.
   "returns a wrapped version of parser p that modifies result before
