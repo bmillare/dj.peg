@@ -1,4 +1,4 @@
-# dj.peg 0.1.0
+# dj.peg 0.2.0
 
 A Ring inspired (aka functional and composable) parsing expression
 grammar (PEG) library.
