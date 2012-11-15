@@ -187,7 +187,7 @@
 ;; though.
 
 ;; choice
-(defn /
+(defn |
   "returns a parser that calls succeed on the first succeeded parser"
   ([m n]
      (fn [input succeed fail]

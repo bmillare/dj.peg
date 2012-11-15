@@ -27,7 +27,7 @@ s: sequence
 *: star
 +: plus
 ?: opt
-/: choice
+|: choice
 !?: not?
 &?: and?
 alt: alter-result
