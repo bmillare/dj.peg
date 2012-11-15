@@ -14,12 +14,23 @@ A quick example:
 
     (require [dj.peg :as peg])
 
-    (let [num (peg/alt (peg/token #"\d+") #(Integer/parseInt %))
-          whitespace (peg/token #"\s+")
-          triplet (peg/seq num whitespace num whitespace num)]
+    (let [num (peg/alt (peg/t #"\d+") #(Integer/parseInt %))
+          whitespace (peg/t #"\s+")
+          triplet (peg/s num whitespace num whitespace num)]
       (peg/parse triplet "3 44 2theremaininginput"))
 
     ;;user=> [[3 " " 44 " " 2] "theremaininginput"]
+
+API summary:
+t: token
+s: sequence
+*: star
++: plus
+?: opt
+/: choice
+!?: not?
+&?: and?
+alt: alter-result
 
 # Author
 

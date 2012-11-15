@@ -1,5 +1,7 @@
 (ns dj.peg
-  (:refer-clojure :exclude [seq]))
+  (:refer-clojure :exclude [* + /]))
+;; api:
+;; t, s, *, +, ?, /, !?, &?, alt
 
 ;; Note: This file is written in a pseudo literate programming (LP)
 ;; style. Instead of relying on the LP tools to expand and reorganize
@@ -64,19 +66,20 @@
 
 ;; To start, lets look at a simple parser generator, token.
 
-(defn token
-;; This is the first example parser generator. Given a regular
-;; expression, it returns a parser that will succeed if there is a
-;; match (see .lookingAt to understand exactly what constitutes a
-;; match), else it will fail. To succeed or fail, means to call
-;; succeed or call fail. This continuation style programming, and
-;; allows us to easily modify our control flow. I call the parser that
-;; token returns, a terminal parser, since it does not delegate to
-;; other parsers that conform to our function contracts. This stops
-;; the recursion and thus 'terminates' the parsing. This, also implies
-;; that we must translate what it means for a java re matcher to
-;; succeed and fail, to our convention, and wrap that up into a parser
-;; function.
+;; token
+(defn t
+  ;; This is the first example parser generator. Given a regular
+  ;; expression, it returns a parser that will succeed if there is a
+  ;; match (see .lookingAt to understand exactly what constitutes a
+  ;; match), else it will fail. To succeed or fail, means to call
+  ;; succeed or call fail. This continuation style programming, and
+  ;; allows us to easily modify our control flow. I call the parser that
+  ;; token returns, a terminal parser, since it does not delegate to
+  ;; other parsers that conform to our function contracts. This stops
+  ;; the recursion and thus 'terminates' the parsing. This, also implies
+  ;; that we must translate what it means for a java re matcher to
+  ;; succeed and fail, to our convention, and wrap that up into a parser
+  ;; function.
   "returns parser that looks for token that matches re"
   [^java.util.regex.Pattern re]
   (fn [input succeed fail]
@@ -93,7 +96,7 @@
 	;; the matched string using .group. We must also manage what
 	;; input we consumed, and return what remains to be consumed.
 	
-	(succeed (.group m)             ;; .group returns the matched string
+	(succeed (.group m) ;; .group returns the matched string
 		 (subs input (.end m))) ;; .end returns the index of the end character
 	(fail nil input)))))
 
@@ -136,7 +139,8 @@
 ;; parsers. We will see its first usage in our first delegating
 ;; parser, seq
 
-(defn seq
+;; seq
+(defn s
  "The seq parser generator returns a parser that succeeds only if all
  parsers succeed. The result that will be passed to succeed will be a
  vector of the results returned by all the other parsers."
@@ -182,7 +186,8 @@
 ;; purpose on wikipedia. I may mention programming issues that came up
 ;; though.
 
-(defn choice
+;; choice
+(defn /
   "returns a parser that calls succeed on the first succeeded parser"
   ([m n]
      (fn [input succeed fail]
@@ -197,9 +202,10 @@
 	   succeed
 	   fail)))))
   ([m n & args]
-     (reduce choice (choice m n) args)))
+     (reduce / (/ m n) args)))
 
-(defn star
+;; star
+(defn *
   "returns a parser that always succeeds on n number of calls to
   parser x on input"
   [x]
@@ -230,7 +236,8 @@
        first-continue
        succeed))))
 
-(defn plus [x]
+;; plus
+(defn + [x]
   (fn [input succeed fail]
     (letfn [(first-continue [old-result old-rest-input]
 			    (bounce
@@ -259,7 +266,9 @@
 ;; since I can't think of pratical use for this. If you desire this,
 ;; you can discuss this with me. Also you can always write new look
 ;; ahead parser generators.
-(defn not?
+
+;; not?
+(defn !?
   "negative lookahead, returns parser that parses without consuming
   input"
   [x]
@@ -272,7 +281,8 @@
      (fn [_ _]
        (succeed nil input)))))
 
-(defn and?
+;; and?
+(defn &?
   "and lookahead, returns parser that parses without consuming input"
   [x]
   (fn [input succeed fail]
@@ -284,7 +294,8 @@
      (fn [_ _]
        (fail nil input)))))
 
-(defn opt
+;; opt
+(defn ?
   "returns parser that optionally accepts input"
   [x]
   (fn [input succeed fail]
@@ -297,7 +308,7 @@
 
 (defn parse
 ;; This is the default trampoline wrapper. You use this function to
-;; invoke a parser at the toplevel.  Example: (peg/parse (peg/token
+;; invoke a parser at the toplevel.  Example: (peg/parse (peg/t
 ;; #"\d+") "234")
   "calls the parser on input with default continuation functions. On
   success, returns a vector of the result and the remaining input. On
@@ -319,18 +330,17 @@
 		 succeed
 		 fail)))
 
-;; The peg library takes some inspiration from Ring. The function
-;; alt is like middleware in that it wraps the old parser, do
-;; some data manipulation, and return a new parser.
+;; The peg library takes some inspiration from Ring. The function alt
+;; is like middleware in that it wraps the old parser, do some data
+;; manipulation, and return a new parser.
 
 (defn alt
 ;; To me this is the most useful continuation wrapper. One good
 ;; example, you want to parse a number, so you write a token parser
-;; with (peg/token #"\d+"). You want the result to be an actual
-;; number, so you wrap it with java's integer
-;; parser. (peg/alt (peg/token #"\d+") #(Integer/parseInt %))
-;; Now, when you invoke it, succeed gets passed an Integer instead of
-;; a string.
+;; with (peg/t #"\d+"). You want the result to be an actual number, so
+;; you wrap it with java's integer parser. (peg/alt (peg/t #"\d+")
+;; #(Integer/parseInt %)) Now, when you invoke it, succeed gets passed
+;; an Integer instead of a string.
   "returns a wrapped version of parser p that modifies result before
   passing it to the succeed function"
   [p result-alter-fn]
