@@ -19,7 +19,7 @@ A quick example:
           triplet (peg/s num whitespace num whitespace num)]
       (peg/parse triplet "3 44 2theremaininginput"))
 
-    ;;user=> [[3 " " 44 " " 2] "theremaininginput"]
+    ;;user=> {:result [3 " " 44 " " 2] :unconsumed-input "theremaininginput"}
 
 API summary:
 
