@@ -319,7 +319,8 @@
      (trampoline parser
 		 input
 		 (fn [result rest-input]
-		   [result rest-input])
+                   {:result result
+                    :unconsumed-input rest-input})
 		 (fn [result rest-input]
 		   (throw (Exception. (str "Parse failed with result: "
 					   result " and remaining input: "
@@ -331,8 +332,8 @@
 		 fail)))
 
 ;; The peg library takes some inspiration from Ring. The function alt
-;; is like middleware in that it wraps the old parser, do some data
-;; manipulation, and return a new parser.
+;; is like middleware in that it wraps the old parser, does some data
+;; manipulation, and returns a new parser.
 
 (defn alt
 ;; To me this is the most useful continuation wrapper. One good
