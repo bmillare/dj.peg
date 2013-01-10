@@ -12,14 +12,16 @@ it, this would be a good opportunity to check it out.
 
 A quick example:
 
-    (require [dj.peg :as peg])
+```clojure
+(require [dj.peg :as peg])
 
-    (let [num (peg/alt (peg/t #"\d+") #(Integer/parseInt %))
-          whitespace (peg/t #"\s+")
-          triplet (peg/s num whitespace num whitespace num)]
-      (peg/parse triplet "3 44 2theremaininginput"))
+(let [num (peg/alt (peg/t #"\d+") #(Integer/parseInt %))
+      whitespace (peg/t #"\s+")
+      triplet (peg/s num whitespace num whitespace num)]
+  (peg/parse triplet "3 44 2theremaininginput"))
 
-    ;;user=> {:result [3 " " 44 " " 2] :unconsumed-input "theremaininginput"}
+;;user=> {:result [3 " " 44 " " 2] :unconsumed-input "theremaininginput"}
+```
 
 API summary:
 
