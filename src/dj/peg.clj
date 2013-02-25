@@ -14,9 +14,9 @@
 ;; Advantages: There are quite a few advantages to PEG parsers. They
 ;; are strictly more powerful than regular expressions, since there is
 ;; recursion, you can parse nested parentheses. Because the choice
-;; operator is creates a preference over two paths, PEG parsers are
-;; never ambiguous. So for example, they will always be able to parse
-;; the "dangling else" problem found in C, C++ and Java. When combined
+;; operator creates a preference over two paths, PEG parsers are never
+;; ambiguous. So for example, they will always be able to parse the
+;; "dangling else" problem found in C, C++ and Java. When combined
 ;; with functional programming techniques, it becomes very easy to
 ;; write small, composable parsers, eliminating the need to define
 ;; grammars in a separate format and call large parser generators such
@@ -38,9 +38,16 @@
 ;; in this library you need to understand:
 
 ;; 1. Parsers Generators
+;; (parsers* | args) -> parser
 ;; 2. Parsers
+;; (input succeed fail) -> call to succeed or fail
 ;; 3. Success and Fail continuation functions
+;; (result remaining-input)
+;;  -> call to parsers (usually with closed over values) [delegation]
+;;  -> call to another succeed or fail function [aggregation]
+;;  -> aggregates results (terminal)
 ;; 4. Continuation wrappers
+;; (parser args*) -> modified parser
 
 ;; You will also use the trampoline wrappers, but they are simply a
 ;; convenience function for calling the parsers.
@@ -98,7 +105,8 @@
 	
 	(succeed (.group m) ;; .group returns the matched string
 		 (subs input (.end m))) ;; .end returns the index of the end character
-	(fail nil input)))))
+        ;; for error reporting, we can return the regex that failed
+	(fail re input)))))
 
 ;; NOTE: On writing your own terminal parsers. It's very easy to write
 ;; your own terminal parsers. In the above example I treat a string as
@@ -157,8 +165,8 @@
 	   (fn [n-result n-rest-input]
 	     ;; The result is a vector of all the results
 	     (succeed [m-result n-result] n-rest-input))
-	   (fn [_ _]
-	     (fail nil input))))
+	   (fn [e-result _]
+	     (fail e-result input))))
 	fail)))
   ([m n & args]
      ;; The more than 2 parser case is tricky because we want the
@@ -176,8 +184,8 @@
 			 m'-rest-input
 			 (fn [n'-result n'-rest-input]
 			   (succeed (conj m'-result n'-result) n'-rest-input))
-			 (fn [_ _]
-			   (fail nil input))))
+			 (fn [e-result _]
+			   (fail e-result input))))
 		      fail)))]
        (reduce seq' (s m n) args))))
 
@@ -276,10 +284,10 @@
     (bounce
      x
      input
-     (fn [_ _]
-       (fail nil input))
-     (fn [_ _]
-       (succeed nil input)))))
+     (fn [result _]
+       (fail result input))
+     (fn [result _]
+       (succeed result input)))))
 
 ;; and?
 (defn &?
@@ -289,10 +297,10 @@
     (bounce
      x
      input
-     (fn [_ _]
-       (succeed nil input))
-     (fn [_ _]
-       (fail nil input)))))
+     (fn [result _]
+       (succeed result input))
+     (fn [result _]
+       (fail result input)))))
 
 ;; opt
 (defn ?
