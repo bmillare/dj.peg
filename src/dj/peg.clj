@@ -46,6 +46,11 @@
 ;;  -> call to parsers (usually with closed over values) [delegation]
 ;;  -> call to another succeed or fail function [aggregation]
 ;;  -> aggregates results (terminal)
+
+;; Note: To reduce the number of continuations we must manage, we will
+;; assume failures should never consume input and success may or may
+;; not consume input
+
 ;; 4. Continuation wrappers
 ;; (parser args*) -> modified parser
 
@@ -242,7 +247,8 @@
        x
        input
        first-continue
-       succeed))))
+       (fn [_ _]
+         (succeed nil input))))))
 
 ;; plus
 (defn + [x]
