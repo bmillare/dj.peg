@@ -3,6 +3,8 @@
 A Ring inspired (aka functional and composable) parsing expression
 grammar (PEG) library.
 
+With leiningen use `[org.bmillare/dj.peg "0.3.0"]`
+
 A while back I wrote a PEG generator. Since it was buggy, I've
 completely rewritten it and also tried to write it psuedo literate
 programming (LP) style, in that I try to make it more of a story. I
