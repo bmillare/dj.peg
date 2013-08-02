@@ -316,10 +316,11 @@
 ;; This is the default trampoline wrapper. Use this function to invoke
 ;; a parser at the toplevel. Example: (peg/parse (peg/t #"\d+") "234")
   "calls the parser on input with default continuation functions. On
-  success, returns a vector of the result and the remaining input. On
-  failure, throws and exception with the current result and remaining
-  input. Uses trampolines underneath to limit stack consumption. You
-  can also supply your own succeed and fail continuation functions."
+  success, returns a hash-map of the result and the remaining
+  input. On failure, throws and exception with the current result and
+  remaining input. Uses trampolines underneath to limit stack
+  consumption. You can also supply your own succeed and fail
+  continuation functions."
   ([parser input]
      (trampoline parser
 		 input
@@ -327,9 +328,10 @@
                    {:result result
                     :unconsumed-input rest-input})
 		 (fn [result rest-input]
-		   (throw (Exception. (str "Parse failed with result: "
-					   result " and remaining input: "
-					   rest-input))))))
+		   (throw (ex-info (str "Parse failed with result: "
+                                        result)
+                                   {:result result
+                                    :unconsumed-input rest-input})))))
   ([parser input succeed fail]
      (trampoline parser
 		 input
